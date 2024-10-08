@@ -1,5 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Sixtyfour+Convergence&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 * {
     box-sizing: content-box;
     margin: 0px;
     padding: 0px;
+}
+
+body {
+    height: 100vh;
+    background: rgb(0,4,255);
+    background: radial-gradient(circle, rgba(0,4,255,1) 30%, rgba(0,0,0,0.7755894594165791) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.container {
+    background-color: rgb(44, 44, 44);
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border-radius: 20px;
+    background-color: black;
+}
+
+#display-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 0.5em;
+    height: 200px;
+    border: 1px solid whitesmoke;
+    border-radius: 35px;
+    padding-bottom: 1em;
+    margin: 0.5em;
+}
+
+#display {
+    font-family: "Ubuntu Mono", "Pixelify Sans", sans-serif;
+    font-size: 72px;
+    text-align: right;
+    padding: 0.1em;
+    display: block;
+    background-color: black;
+    border: none;
+    outline: none;
+    color: white;
+    min-width: 365px;
+    max-width: 365px;
+    cursor: default;
+}
+
+#pad {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+    gap: 0.5em;
+    text-align: center;
+    /* outline: 1px solid white; */
+    padding: 0.5em;
+    font-size: 32px;
+    height: 460px;
+}
+
+.pad-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(40, 39, 39);
+    border-radius: 50px;
+}
+
+.pad-item:hover {
+    background-color: rgb(72, 72, 72);
+}
+
+.pad-item.orange {
+    background-color: rgb(203, 132, 0);
+}
+
+.pad-item.orange:hover {
+    background-color: rgb(245, 191, 90);
+}
+
+.pad-item.whitegray {
+    background-color: rgb(104, 104, 104);
+}
+
+.pad-item.whitegray:hover {
+    background-color: rgb(168, 168, 168);
+}
+
+.pad-item.wide {
+    grid-column: 1 / span 2;
+    justify-content: flex-start;
+    padding-left: 1em;
+}
+
+.operator,
+.operand,
+.util {
+    cursor: default;
 }
