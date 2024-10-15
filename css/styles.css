@@ -4,6 +4,8 @@
     box-sizing: content-box;
     margin: 0px;
     padding: 0px;
+    border: none;
+    outline: none;
 }
 
 body {
@@ -35,6 +37,7 @@ body {
     border-radius: 35px;
     padding-bottom: 1em;
     margin: 0.5em;
+    caret-color: transparent;
 }
 
 #display {
@@ -70,10 +73,25 @@ body {
     align-items: center;
     background-color: rgb(40, 39, 39);
     border-radius: 50px;
+    width: 80px;
+    height: 80px;   
 }
 
+.pad-item.wide {
+    grid-column: 1 / span 2;
+    justify-content: flex-start;
+    padding-left: 1em;
+    width: 140px;
+}
+
+/* Click and hover behavior events */
 .pad-item:hover {
     background-color: rgb(72, 72, 72);
+}
+
+.pad-item:active {
+    background-color: rgb(40, 39, 39);
+    outline: 1px solid white;
 }
 
 .pad-item.orange {
@@ -84,6 +102,10 @@ body {
     background-color: rgb(245, 191, 90);
 }
 
+.pad-item.orange:active {
+    background-color: rgb(203, 132, 0);
+}
+
 .pad-item.whitegray {
     background-color: rgb(104, 104, 104);
 }
@@ -92,10 +114,8 @@ body {
     background-color: rgb(168, 168, 168);
 }
 
-.pad-item.wide {
-    grid-column: 1 / span 2;
-    justify-content: flex-start;
-    padding-left: 1em;
+.pad-item.whitegray:active {
+    background-color: rgb(104, 104, 104);
 }
 
 .operator,
