@@ -4,6 +4,11 @@ const COMMA = ".";
 const ERROR = "Error";
 const mainOperation = new Operation();
 
+let numbersStack = [];
+let signsStack = [];
+let inputState = "Clearable"; // Clearable, Input, Calculation - set input panel behavior
+let currentSign = null; // Need to clarify whether some operation is being performed
+
 function add(a, b) {
     return Number(a) + Number(b);
 }
@@ -20,6 +25,10 @@ function divide(a, b) {
     return Number(a) / Number(b);
 }
 
+function percent(a) {
+    return a / 100;
+}
+
 function isError(value) {
     return value === ERROR || value == "Infinity" || isNaN(Number(value));
 }
@@ -34,15 +43,20 @@ function Operation() {
     this.matcher.set('-', substract);
     this.matcher.set('x', multiply);
     this.matcher.set('/', divide);
+    this.matcher.set('%', percent);
 
     this.leftOperand = null;
     this.rightOperand = null;
     this.operator = null;
 
     this.operation = function() {
-        if (!this.leftOperand || !this.rightOperand || !this.operation) {
+        if (!this.leftOperand || !this.rightOperand || !this.operator) {
             console.error ("Wrong conditions!");
             return 0;
+        }
+
+        if (this.operator === "=") {
+            return this.leftOperand;   
         }
 
         let result = this.matcher.get(this.operator)(this.leftOperand, this.rightOperand);
@@ -68,9 +82,13 @@ function getTextFromButton(elem) {
 
 function resetState() {
     currentInput = "0";
+    inputState = "Clearable";
+    numbersStack = [];
+    signsStack = [];
     mainOperation.leftOperand = null;
     mainOperation.rightOperand = null;
     mainOperation.operator = null;
+    currentSign = null;
 
     const inputField = document.querySelector("#display");
     inputField.value = currentInput;
@@ -78,11 +96,13 @@ function resetState() {
 
 function updateState(result) {
     const inputField = document.querySelector("#display");
-    currentInput = result;
+    currentInput = String(result);
+    numbersStack.unshift(result);
     inputField.value = currentInput;
-    mainOperation.leftOperand = currentInput;
     mainOperation.rightOperand = null;
+    mainOperation.leftOperand = null;
     mainOperation.operator = null;
+    currentSign = null;
 }
 
 function initListeners() {
@@ -93,21 +113,15 @@ function initListeners() {
     pad.addEventListener("click", (event) => {
         const classes = event.target.classList;
         // Check whether it's numeric value or comma
-        if (classes.contains("operand") || (classes.contains("pad-item") && event.target.children[0].classList.contains("operand"))) {
-            
-            // Operation is set already. Then we need to clear the screen
-            if (mainOperation.operator && currentInput === mainOperation.leftOperand) {
-                currentInput = "0";
-                inputField.value = currentInput;
-            }
-
+        if (classes.contains("operand")) {
             if (currentInput.length < MAX_INPUT_SIZE) {
                 const text = getTextFromButton(event.target);
                 if (text === COMMA && currentInput.includes(COMMA) || currentInput === ERROR) {
                     return;
                 }
-                else if (currentInput === "0" && text !== COMMA) {
+                else if ((inputState === "Clearable" || inputState === "Calculation") && text !== COMMA) {
                     currentInput = text;
+                    inputState = "Input";
                 } 
                 else {
                     currentInput += text;
@@ -117,32 +131,59 @@ function initListeners() {
         }
         
         // Check whether it's arifmetic operator
-        else if (classes.contains("operator") || (classes.contains("pad-item") && event.target.children[0].classList.contains("operator"))) {
-            const text = getTextFromButton(event.target);
-            
-            mainOperation.leftOperand = currentInput;
+        else if (classes.contains("operator")) {
+            const sign = getTextFromButton(event.target);
+            numbersStack.unshift(currentInput);
+            signsStack.unshift(sign);
 
-            // When we click + and + again, etc. Then perform the operation and update
-            if (mainOperation.operator) {
-                if (mainOperation.rightOperand) {
-                    const result = operate();
-                    updateState(result);
-                }
-            }
-
-            mainOperation.operator = text;
-        }
-
-        else if (classes.contains("util") || (classes.contains("pad-item") && event.target.children[0].classList.contains("util"))) {
-            if (event.target.id === "clear" || event.target.firstChild.id === "clear") {
-                resetState();
-            } else if (event.target.id === "result" || event.target.children[0].id === "result") {
-
-                if (!mainOperation.leftOperand) return;
-
-                mainOperation.rightOperand = currentInput;
+            // Perform percent in-place with displaying result immedietely
+            if (sign === "%") {
+                mainOperation.leftOperand = numbersStack[0];
+                mainOperation.rightOperand = 100;
+                mainOperation.operator = signsStack[0];
                 const result = operate();
                 updateState(result);
+                return;
+            }
+
+            // Press operation multiple times without using equals
+            if (currentSign || sign === "%") {
+                mainOperation.rightOperand = numbersStack[0];
+                mainOperation.leftOperand = numbersStack[1] ?? mainOperation.rightOperand;
+                mainOperation.operator = signsStack[1] ?? signsStack[0]; // Perform previous operation and just save current for the future
+            }
+
+            // Commit current input and operation
+            inputState = "Calculation";
+            currentSign = sign;
+        }
+
+        else if (classes.contains("util")) {
+            if (event.target.id === "clear") {
+                resetState();
+            } else if (event.target.id === "result") {
+                if (inputState === "Calculation" || inputState === "Input") {
+                    numbersStack.unshift(currentInput);
+
+                    mainOperation.rightOperand = numbersStack[0];
+                    mainOperation.leftOperand = numbersStack[1] ?? mainOperation.rightOperand;
+                    mainOperation.operator = signsStack[0] ?? "=";
+                    const result = operate();
+                    updateState(result);
+                    inputState = "Clearable";
+                }
+            }
+            else if (event.target.id === "back") {
+                const inputField = document.querySelector("#display");
+                
+                if (currentInput.length === 1) {
+                    currentInput = "0";
+                    inputState = "Clearable";
+                }
+                else {
+                    currentInput = currentInput.slice(0, currentInput.length - 1);
+                }
+                inputField.value = currentInput;
             }
         }
     })
