@@ -37,6 +37,13 @@ function cut(value, length) {
     return Number(value.slice(0, length));
 }
 
+function getID(elem) {
+    if (!elem.id && elem.children.length > 0) {
+        return getID(elem.children[0]);
+    }
+    return elem.id;
+}
+
 function Operation() {
     this.matcher = new Map();
     this.matcher.set('+', add);
@@ -111,6 +118,7 @@ function initListeners() {
     inputField.value = currentInput;
 
     pad.addEventListener("click", (event) => {
+        console.log (`Classes: ${event.target.classList}, ID: ${event.target.id}`)
         const classes = event.target.classList;
         // Check whether it's numeric value or comma
         if (classes.contains("operand")) {
@@ -159,9 +167,10 @@ function initListeners() {
         }
 
         else if (classes.contains("util")) {
-            if (event.target.id === "clear") {
+            const utilId = getID(event.target);
+            if (utilId === "clear") {
                 resetState();
-            } else if (event.target.id === "result") {
+            } else if (utilId === "result") {
                 if (inputState === "Calculation" || inputState === "Input") {
                     numbersStack.unshift(currentInput);
 
@@ -173,7 +182,7 @@ function initListeners() {
                     inputState = "Clearable";
                 }
             }
-            else if (event.target.id === "back") {
+            else if (utilId === "back") {
                 const inputField = document.querySelector("#display");
                 
                 if (currentInput.length === 1) {
